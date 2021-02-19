@@ -1,13 +1,13 @@
 # api-server
 
 ## Github PR
-* 
+* https://github.com/gerstej9/api-server/pulls?q=is%3Apr+is%3Aclosed
 
 ## Github Actions
-
+https://github.com/gerstej9/api-server/actions
 
 ## Heroku URLs
-
+https://jamesgersten-api-server.herokuapp.com/
 
 ## UML
 ![](./assets/api-server-lab04.jpg)
