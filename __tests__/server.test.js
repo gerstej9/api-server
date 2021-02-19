@@ -1,23 +1,11 @@
 'use strict';
 
+require('@code-fellows/supergoose');
+const { response } = require('express');
 const supertest = require ('supertest');
 const server = require('../src/server.js');
 const request = supertest(server.app);
 
-
-describe('testing server for 500 on no ID', () =>{
-  it ('should send a 500 status no ID provided', async () => {
-    const response = await request.get('/food/noID');
-    expect(response.status).toEqual(500);
-  })
-})
-
-describe('testing server for 500 on no ID', () =>{
-  it ('should send a 500 status no ID provided', async () => {
-    const response = await request.get('/clothes/noID');
-    expect(response.status).toEqual(500);
-  })
-})
 
 describe('testing server for 404 on bad route', () =>{
   it ('should send a 404 status route does not exist', async () => {
@@ -41,17 +29,21 @@ describe('testing server for create a food', () =>{
       cuisine: 'Mexican'
     });
     expect(response.status).toEqual(200);
-    expect(response.body.id).toEqual(1);
-    expect(response.body.data.type).toEqual('taco')
+    expect(response.body._id).toBeDefined();
+    expect(response.body.type).toEqual('taco')
   });
 });
 
 
 describe('testing for finding a food by ID', () =>{
   it ('should return a food object if correctly used', async () => {
-    const response = await request.get('/food/1');
-    expect(response.status).toEqual(200);
-    expect(response.body.id).toEqual(1);
+    const response = await request.post('/food').send({
+      type: 'spaghetti',
+      cuisine: 'Italian'
+    });
+    const findResponse = await request.get(`/food/${response.body._id}`);
+    expect(findResponse.status).toEqual(200);
+    expect(findResponse.body[0]._id).toEqual(response.body._id);
   })
 })
 
@@ -65,42 +57,56 @@ describe('testing for retrieving food database', () =>{
 
 describe('testing for updating a food by ID', () =>{
   it ('should update a food object if correctly used', async () => {
-    const response = await request.put('/food/1').send({
+    const response = await request.post('/food').send({
+      type: 'ramen',
+      cuisine: 'Japanese'
+    });
+    const updateResponse = await request.put(`/food/${response.body._id}`).send({
       type: 'spaghetti',
       cuisine: 'italian'
     });
-    expect(response.status).toEqual(200);
-    expect(response.body.id).toEqual(1);
-    expect(response.body.data.type).toEqual('spaghetti')
+    expect(updateResponse.status).toEqual(200);
+    expect(updateResponse.body._id).toEqual(response.body._id);
+    const findResponse = await request.get(`/food/${response.body._id}`);
+    expect(findResponse.body[0].type).toEqual('spaghetti');
   })
 })
 
 describe('testing for deleting a food by ID', () =>{
   it ('should delete a food object if correctly used', async () => {
-    const response = await request.delete('/food/1');
-    expect(response.status).toEqual(200);
-    expect(response.body).toEqual("");
+    const response = await request.post('/food').send({
+      type: 'gyro',
+      cuisine: 'Turkish'
+    });
+    const deleteResponse = await request.delete(`/food/${response.body._id}`);
+    expect(deleteResponse.status).toEqual(200);
+    expect(deleteResponse.body.type).toEqual("gyro");
+    expect(deleteResponse.body.cuisine).toEqual("Turkish");
   })
 })
 
-describe('testing server for create a cloth', () =>{
-  it ('should create a cloth on POST /cloth', async () => {
+describe('testing server for create clothes', () =>{
+  it ('should create a food on POST /clothes', async () => {
     const response = await request.post('/clothes').send({
-      type: 'vest',
-      material: 'polyester'
+      type: 'jacket',
+      material: 'leather'
     });
     expect(response.status).toEqual(200);
-    expect(response.body.id).toEqual(1);
-    expect(response.body.data.type).toEqual('vest')
+    expect(response.body._id).toBeDefined();
+    expect(response.body.type).toEqual('jacket')
   });
 });
 
 
 describe('testing for finding a cloth by ID', () =>{
-  it ('should return a cloth object if correctly used', async () => {
-    const response = await request.get('/clothes/1');
-    expect(response.status).toEqual(200);
-    expect(response.body.id).toEqual(1);
+  it ('should return a clothing object if correctly used', async () => {
+    const response = await request.post('/clothes').send({
+      type: 'shoes',
+      material: 'suede'
+    });
+    const findResponse = await request.get(`/clothes/${response.body._id}`);
+    expect(findResponse.status).toEqual(200);
+    expect(findResponse.body[0]._id).toEqual(response.body._id);
   })
 })
 
@@ -114,20 +120,30 @@ describe('testing for retrieving clothes database', () =>{
 
 describe('testing for updating a cloth by ID', () =>{
   it ('should update a cloth object if correctly used', async () => {
-    const response = await request.put('/clothes/1').send({
-      type: 'jacket',
-      material: 'suede'
+    const response = await request.post('/clothes').send({
+      type: 'pants',
+      material: 'denim'
     });
-    expect(response.status).toEqual(200);
-    expect(response.body.id).toEqual(1);
-    expect(response.body.data.type).toEqual('jacket')
+    const updateResponse = await request.put(`/clothes/${response.body._id}`).send({
+      type: 'shoes',
+      material: 'canvas'
+    });
+    expect(updateResponse.status).toEqual(200);
+    expect(updateResponse.body._id).toEqual(response.body._id);
+    const findResponse = await request.get(`/clothes/${response.body._id}`);
+    expect(findResponse.body[0].type).toEqual('shoes');
   })
 })
 
-describe('testing for deleting a cloth by ID', () =>{
-  it ('should delete a cloth object if correctly used', async () => {
-    const response = await request.delete('/clothes/1');
-    expect(response.status).toEqual(200);
-    expect(response.body).toEqual("");
+describe('testing for deleting a food by ID', () =>{
+  it ('should delete a food object if correctly used', async () => {
+    const response = await request.post('/clothes').send({
+      type: 'sweater',
+      material: 'cashmere'
+    });
+    const deleteResponse = await request.delete(`/clothes/${response.body._id}`);
+    expect(deleteResponse.status).toEqual(200);
+    expect(deleteResponse.body.type).toEqual("sweater");
+    expect(deleteResponse.body.material).toEqual("cashmere");
   })
 })

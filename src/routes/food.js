@@ -1,50 +1,51 @@
-const { response } = require('express');
+'use strict';
+
 const express = require('express');
 const router = express.Router();
 
-const validator = require ('../middleware/validator.js');
+const ModelInterface = require('../models/data-collection-class.js');
+const FoodModel = require('../models/food.js');
 
-const Foods = require('../models/food.js');
-const food = new Foods();
+const foodController = new ModelInterface(FoodModel);
 
 router.get('/food', allFoods);
-router.get('/food/:id', validator, getOneFood);
+router.get('/food/:id', getOneFood);
 router.post('/food', createFood);
-router.put('/food/:id', validator, updateFood);
-router.delete('/food/:id', validator, deleteFood);
+router.put('/food/:id', updateFood);
+router.delete('/food/:id', deleteFood);
 
-function allFoods(req, res, next){
-  let foodObject = food.read();
+async function allFoods(req, res, next){
+  let foodObject = await foodController.read();
   res.status(200).json(foodObject);
 }
 
-function getOneFood(req, res, next){
-  const id = Number(req.params.id);
-  let foodObject = food.read(id);
+async function getOneFood(req, res, next){
+  const id = req.params.id;
+  let foodObject = await foodController.read(id);
   res.status(200).json(foodObject);
 }
 
-function createFood(req, res, next){
+async function createFood(req, res, next){
   const foodObject = req.body;
-  let responseObject = food.create(foodObject);
+  let responseObject = await foodController.create(foodObject);
   res.status(200).json(responseObject);
 }
 
-function updateFood(req, res, next){
-  const id = Number(req.params.id);
+async function updateFood(req, res, next){
+  const id = req.params.id;
   if(req.body.type && req.body.cuisine){
 
   const foodObject = req.body;
-  let responseObject = food.update(id, foodObject);
+  let responseObject = await foodController.update(id, foodObject);
   res.status(200).json(responseObject);
   }else{
     next();
   }
 }
 
-function deleteFood(req, res, next){
-  const id = Number(req.params.id);
-  let database = food.destroy(id);
+async function deleteFood(req, res, next){
+  const id = req.params.id;
+  let database = await foodController.destroy(id);
   res.status(200).json(database);
 }
 

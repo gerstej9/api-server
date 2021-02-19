@@ -1,43 +1,13 @@
 'use strict';
 
-class Foods {
+const mongoose = require('mongoose');
 
-  constructor(){
-    this.id = 0;
-    this.db = [];
-  }
+const foodSchema = mongoose.Schema({
+  type: {type: String, required: true},
+  cuisine: {type: String, required: true}
+});
 
-  read(id){
-    if(id){
-      return this.db.find(food => food.id === id);
-    } else {
-      return this.db;
-    }
-  }
-  
-  create(newObj){
-    let newFood = {
-      id: this.id += 1,
-      data: newObj,
-    }
-    this.db.push(newFood);
-    return newFood;
-  }
+const foodModel = mongoose.model('food', foodSchema);
 
-  update(id, newObj){
-    for(let i = 0; i < this.db.length; i++){
-      if(this.db[i].id === id) {
-        this.db[i].data = newObj;
-        return this.db[i];
-      }
-    }
-  }
+module.exports = foodModel;
 
-  destroy(id){
-    delete this.db[id];
-    return this.db[id];
-  }
-}
-
-
-module.exports = Foods;
